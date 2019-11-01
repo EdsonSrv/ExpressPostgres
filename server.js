@@ -1,4 +1,7 @@
 const {Client} = require('pg')
+const express = require('express')
+const app = express();
+app.use(express.json())
 
 const client = new Client({
   "user": "postgres",
@@ -8,17 +11,41 @@ const client = new Client({
   "database": "youtube"
 })
 
+app.get("/youtube", async (req, res) => {
+  const rows = await readYoutube()
+  res.setHeader("content-type", "application/json")
+  res.send(JSON.stringify(rows))
+})
+/* app.post("/youtube", async (req, res) => {
+let result = {}
+  try {
+    const reqJson = req.body
+    await createYoutube(reqJson.youtube)
+    result.success = true
+  } catch (error) {
+    result.success = false
+  }
+  finally {
+    res.setHeader("content-type", "application/json")
+    res.send(JSON.stringify(result))
+  }
+})
+ */
+
+app.listen(8090, () => console.log("Web server is listening... on port 8090"))
+
 start()
 async function start(){
     await connect()
-    const youtube = await readYoutube()
-    console.log(youtube)
 
-    const successCreate = await createYoutube("Go to trader joes")
-    console.log(`Creating was ${successCreate}`)
-
-   // const successDelete = await deleteYoutube(1)
-   // console.log(`Deleting was ${successDelete}`)
+    //const youtube = await readYoutube()
+    //console.log(youtube)
+    
+    //const successCreate = await createYoutube(["Title example","Go to trader joes"])
+    //console.log(`Creating was ${successCreate}`)
+    
+    //const successDelete = await deleteYoutube(1)
+    //console.log(`Deleting was ${successDelete}`)
 }
 
 async function connect(){
@@ -40,9 +67,9 @@ async function readYoutube(){
   }
 }
 
-async function createYoutube(text){
+async function createYoutube(values){
   try {
-    await client.query("insert into videos (id, title, description) values (1, 'hola mundo', 'description text')")
+    await client.query("insert into videos (id, title, description) values (2, $1, $2)",values)
     return true
   } catch (error) {
     return false
